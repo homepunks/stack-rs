@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::alloc::{alloc, realloc, Layout};
+use std::alloc::{alloc, realloc, Layout, dealloc};
 
 struct DinoStack<T> {
     ptr: *mut T,
@@ -66,6 +66,20 @@ impl<T> DinoStack<T> {
         self.sz -= 1;
 
         unsafe { Some(self.ptr.add(self.sz).read()) }
+    }
+}
+
+impl<T> Drop for DinoStack<T> {
+    fn drop(&mut self) {
+        while self.pop().is_some() {}
+        self.sz = 0;
+
+        if self.cap > 0 {
+            unsafe {
+                let layout = Layout::array::<T>(self.cap).unwrap();
+                dealloc(self.ptr as *mut u8, layout)
+            }
+        }
     }
 }
 
