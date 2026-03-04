@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use std::alloc::{alloc, realloc, Layout};
 
-struct ArrayStack<T> {
+struct DinoStack<T> {
     ptr: *mut T,
     sz: usize,
     cap: usize,
@@ -15,9 +15,9 @@ trait Stack<T> {
     fn is_empty(&self) -> bool;
 }
 
-impl<T> ArrayStack<T> {
+impl<T> DinoStack<T> {
     fn new(&self) -> Self {
-        ArrayStack {
+        DinoStack {
             ptr: std::ptr::null_mut(),
             sz: 0,
             cap: 0,
