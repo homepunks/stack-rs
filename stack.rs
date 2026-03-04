@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use std::alloc::{alloc, realloc, Layout, dealloc};
 
-struct DinoStack<T> {
+pub struct DinoStack<T> {
     ptr: *mut T,
     sz: usize,
     cap: usize,
@@ -16,7 +16,7 @@ trait Stack<T> {
 }
 
 impl<T> DinoStack<T> {
-    fn new(&self) -> Self {
+    pub fn new() -> Self {
         DinoStack {
             ptr: std::ptr::null_mut(),
             sz: 0,
@@ -41,7 +41,7 @@ impl<T> DinoStack<T> {
         self.cap = new_cap;
     }
 
-    fn peek(&self) -> Option<&T> {  
+    pub fn peek(&self) -> Option<&T> {  
         if self.sz == 0 {
             return None;
         }
@@ -49,7 +49,7 @@ impl<T> DinoStack<T> {
         unsafe { Some(&*self.ptr.add(self.sz - 1)) }
     }
 
-    fn push(&mut self, val: T) {
+    pub fn push(&mut self, val: T) {
         if self.sz == self.cap {
             self.grow()
         }
@@ -59,7 +59,7 @@ impl<T> DinoStack<T> {
         self.sz += 1
     }
 
-    fn pop(&mut self) -> Option<T> {
+    pub fn pop(&mut self) -> Option<T> {
         if self.sz == 0 {
             return None;
         }
@@ -83,6 +83,7 @@ impl<T> Drop for DinoStack<T> {
     }
 }
 
-fn main() {
-    println!("Hellope")
+impl<T> DinoStack<T> {
+    pub fn len(&self) -> usize { self.sz }
+    pub fn cap(&self) -> usize { self.cap }
 }
