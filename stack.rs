@@ -8,11 +8,56 @@ pub struct DinoStack<T> {
     _marker: PhantomData<T>,
 }
 
-trait Stack<T> {
+pub trait Stack<T> {
     fn peek(&self) -> Option<&T>;
     fn pop(&mut self) -> Option<T>;
     fn push(&mut self, val: T);
     fn is_empty(&self) -> bool;
+}
+
+impl<T> Stack<T> for DinoStack<T> {
+     fn peek(&self) -> Option<&T> {  
+        if self.sz == 0 {
+            return None;
+        }
+
+        unsafe { Some(&*self.ptr.add(self.sz - 1)) }
+    }
+
+    fn push(&mut self, val: T) {
+        if self.sz == self.cap {
+            self.grow()
+        }
+
+        unsafe { self.ptr.add(self.sz).write(val); }
+
+        self.sz += 1
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.sz == 0 {
+            return None;
+        }
+        self.sz -= 1;
+
+        unsafe { Some(self.ptr.add(self.sz).read()) }
+    }
+
+    fn is_empty(&self) -> bool { self.sz == 0 }
+}
+
+impl<T> Drop for DinoStack<T> {
+    fn drop(&mut self) {
+        while self.pop().is_some() {}
+        self.sz = 0;
+
+        if self.cap > 0 {
+            unsafe {
+                let layout = Layout::array::<T>(self.cap).unwrap();
+                dealloc(self.ptr as *mut u8, layout)
+            }
+        }
+    }
 }
 
 impl<T> DinoStack<T> {
@@ -40,50 +85,8 @@ impl<T> DinoStack<T> {
         self.ptr = new_ptr;
         self.cap = new_cap;
     }
-
-    pub fn peek(&self) -> Option<&T> {  
-        if self.sz == 0 {
-            return None;
-        }
-
-        unsafe { Some(&*self.ptr.add(self.sz - 1)) }
-    }
-
-    pub fn push(&mut self, val: T) {
-        if self.sz == self.cap {
-            self.grow()
-        }
-
-        unsafe { self.ptr.add(self.sz).write(val); }
-
-        self.sz += 1
-    }
-
-    pub fn pop(&mut self) -> Option<T> {
-        if self.sz == 0 {
-            return None;
-        }
-        self.sz -= 1;
-
-        unsafe { Some(self.ptr.add(self.sz).read()) }
-    }
-}
-
-impl<T> Drop for DinoStack<T> {
-    fn drop(&mut self) {
-        while self.pop().is_some() {}
-        self.sz = 0;
-
-        if self.cap > 0 {
-            unsafe {
-                let layout = Layout::array::<T>(self.cap).unwrap();
-                dealloc(self.ptr as *mut u8, layout)
-            }
-        }
-    }
-}
-
-impl<T> DinoStack<T> {
+ 
     pub fn len(&self) -> usize { self.sz }
+
     pub fn cap(&self) -> usize { self.cap }
 }

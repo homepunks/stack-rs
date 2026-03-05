@@ -1,4 +1,4 @@
-use crate::stack;
+use crate::stack::{self, Stack};
 
 pub fn run_tests() {
     {
