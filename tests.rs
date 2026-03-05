@@ -6,6 +6,7 @@ pub fn run_tests() {
         assert_eq!(st.len(), 0);
         assert_eq!(st.cap(), 0);
         assert!(st.peek().is_none());
+        assert!(st.is_empty());
         println!("[+] new_stack_is_empty");
     }
 
